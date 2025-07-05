@@ -3,23 +3,21 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { Router } from 'express';
-import { BookController } from './controller/book.controller';
+import bookRouter from './controller/index';
 
 dotenv.config();
 
 export class App {
   public app: Application;
   private router: Router;
-  private PORT: number = 3000;
+  private PORT: number = process.env.API_PORT ? parseInt(process.env.API_PORT) : 3000;
   private MONGODB_URI: string = process.env.MONGODB_URI || 'mongodb://localhost:27017/biblio-api';
-  private bookController!: BookController;
 
   constructor() {
-    this.app = express();
-    this.router = Router();
-    this.config();
-    this.bookController = new BookController();
     this.connectDatabase();
+    this.app = express();
+    this.config();
+    this.router = Router();
     this.routes();
   }
 
@@ -28,14 +26,17 @@ export class App {
     this.app.use(express.json());
   }
 
-  private connectDatabase(): void {
-    mongoose.connect(this.MONGODB_URI)
-      .then(() => console.log('Connected to MongoDB'))
-      .catch((err) => console.error('Error connecting to MongoDB:', err));
+  private async connectDatabase(): Promise<void> {
+    try {
+      await mongoose.connect(this.MONGODB_URI);
+      console.log('Connected to MongoDB');
+    } catch (err) {
+      console.error('Error connecting to MongoDB:', err);
+    }
   }
 
   private routes(): void {
-    this.router.get('/books', this.bookController.getBooks.bind(this.bookController));
+    this.router.use('/', bookRouter);
     this.app.use('/api', this.router);
   }
 
