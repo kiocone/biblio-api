@@ -1,0 +1,38 @@
+# Pasos para la compilación, subida y despliegue
+steps:
+  # 1. Construir la imagen del contenedor Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'southamerica-east1-docker.pkg.dev/serenisima-desa/biblio-api/biblio-api:$COMMIT_SHA'
+      - '.'
+
+  # 2. Subir la imagen a Google Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'southamerica-east1-docker.pkg.dev/serenisima-desa/biblio-api/biblio-api:$COMMIT_SHA'
+
+  # 3. Desplegar el contenedor en Cloud Run
+  - name: 'gcr.io/google-cloud-sdk/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'biblio-api' # El nombre que tendrá tu servicio en Cloud Run
+      - '--image'
+      - 'southamerica-east1-docker.pkg.dev/serenisima-desa/biblio-api/biblio-api:$COMMIT_SHA'
+      - '--region'
+      - 'southamerica-east1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated' # Permite acceso público a la API. Elimina esta línea si requiere autenticación.
+
+# Lista de imágenes construidas para que aparezcan en los resultados
+images:
+  - 'southamerica-east1-docker.pkg.dev/serenisima-desa/biblio-api/biblio-api:$COMMIT_SHA'
+
+# Opciones para la compilación
+options:
+  # Soluciona el error de logs especificando que se envíen a Cloud Logging
+  logging: CLOUD_LOGGING_ONLY
