@@ -10,7 +10,7 @@ dotenv.config();
 export class App {
   public app: Application;
   private router: Router;
-  private PORT: number = process.env.API_PORT ? parseInt(process.env.API_PORT) : 3000;
+  private PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8080;
   private MONGODB_URI: string = process.env.MONGODB_URI || 'mongodb://localhost:27017/biblio-api';
 
   constructor() {
