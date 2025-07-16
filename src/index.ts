@@ -3,7 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { Router } from 'express';
-import bookRouter from './controller/index';
+import controllersRouter from './controller/index';
 
 dotenv.config();
 
@@ -36,7 +36,7 @@ export class App {
   }
 
   private routes(): void {
-    this.router.use('/', bookRouter);
+    this.router.use('/', controllersRouter);
     this.app.use('/api', this.router);
   }
 
