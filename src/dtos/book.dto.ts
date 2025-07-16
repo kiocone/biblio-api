@@ -1,27 +1,37 @@
-import { Book } from "../schemas/book.schema";
 import { IBook } from "../types/books.interface";
 
 export class BookDto {
-  
-  async getBooks(): Promise<IBook[]> {
-    const books = await Book.find();
-    const response = books.map(book => {
-      return {
-        id: book.id,
-        coverImageUrl: book.coverImageUrl,
-        title: book.title,
-        author: book.author,
-        publishedYear: book.publishedYear,
-        isbn: book.isbn,
-        editorial: book.editorial,
-        language: book.language,
-        description: book.description,
-        genre: book.genre,
-        availableCopies: book.availableCopies,
-        takenBy: book.takenBy,
-      };
-      });
-    return response as IBook[];
-  }
 
+  id!: string;
+  coverImageUrl!: string;
+  title!: string;
+  author!: string;
+  publishedYear!: number;
+  isbn!: string;
+  editorial!: string;
+  language!: string;
+  description!: string;
+  genre!: string;
+  availableCopies!: number;
+  takenBy!: string[];
+
+  async fromDocument(bookDoc: any): Promise<IBook[]> {
+    const bookDto = bookDoc.map((doc: any) => {
+      const bookDto = new BookDto();
+      bookDto.id = doc._id?.toString?.();
+      bookDto.coverImageUrl = doc.coverImageUrl;
+      bookDto.title = doc.title;
+      bookDto.author = doc.author;
+      bookDto.publishedYear = doc.publishedYear;
+      bookDto.isbn = doc.isbn;
+      bookDto.editorial = doc.editorial;
+      bookDto.language = doc.language;
+      bookDto.description = doc.description;
+      bookDto.genre = doc.genre;
+      bookDto.availableCopies = doc.availableCopies;
+      bookDto.takenBy = doc.takenBy;
+      return bookDto;
+    });
+    return bookDto;
+  }
 }
