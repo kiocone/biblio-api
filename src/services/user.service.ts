@@ -16,8 +16,7 @@ export class UserService {
     const user = await User.findOne({ userName: userCredentials.userName, flatPassword: userCredentials.password });
 
     if (!user) {
-      // You can throw an error or return null, depending on your application's needs
-      throw new Error('User not found or invalid credentials');
+      return null;
     }
 
     const authUser = await this.userDto.fromDocument(user);
