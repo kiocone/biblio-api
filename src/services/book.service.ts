@@ -9,8 +9,8 @@ export class BookService {
     this.bookDto = new BookDto();
   }
 
-  async getBooks(): Promise<any> {
-    const books = await Book.find();
+  async getBooks(pageSize: number, pageIndex: number): Promise<any> {
+    const books = await Book.find().skip(pageIndex).limit(pageSize);
     return this.bookDto.fromDocument(books);
   }
 
@@ -24,19 +24,6 @@ export class BookService {
   }
 
   async bulkCreateBooks(booksData: any): Promise<any> {
-    const parsedBooks: IBook[] = [];
-    const lines = booksData.trim().split('\n');
-    const headers = lines[0].split('\t');
-
-    for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split('\t');
-      const book: any = {};
-      headers.forEach((header: string, idx: number) => {
-        book[header.trim()] = values[idx]?.trim();
-      });
-      parsedBooks.push(book as IBook);
-    }
-    booksData = parsedBooks;
     if (!Array.isArray(booksData) || booksData.length === 0) {
       throw new Error('Invalid book data');
     }
@@ -45,10 +32,30 @@ export class BookService {
     for (const bookData of booksData) {
       const newBook = new Book(bookData);
       await newBook.save();
-      // const newBook = bookData;
       createdBooks.push(newBook);
     }
     return this.bookDto.fromDocument(createdBooks);
   }
 
+  async deduplicateBooks(): Promise<any> {
+    const books = await Book.find();
+    const uniqueBooks = new Map<string, any>();
+    const duplicatedBooks = new Map<string, any>();
+
+    for (const book of books) {
+      const key = book.title + book.author + book.publishedYear;
+      if (!uniqueBooks.has(key)) {
+        uniqueBooks.set(key, book);
+      } else {
+        duplicatedBooks.set(key, book);
+      }
+    }
+
+    if (duplicatedBooks.size > 0) {
+      const idsToDelete = Array.from(duplicatedBooks.values()).map((book: any) => book._id);
+      await Book.deleteMany({ _id: { $in: idsToDelete } });
+    }
+
+    return this.bookDto.fromDocument(Array.from(duplicatedBooks.values()));
+  }
 }

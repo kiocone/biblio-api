@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { Request, Response, Router, json } from 'express';
 import { BookService } from '../services/book.service';
 import { AuthMiddleware } from '../middleware/auth.middleware';
 
@@ -13,7 +13,10 @@ export class BookController {
     this.router.get('/', async (req: Request, res: Response) => {
       console.log('Fetching books...');
       try {
-        const books = await this.bookService.getBooks();
+        const pageSize = parseInt(req.query.pageSize as string) || 10;
+        const pageIndex = parseInt(req.query.pageIndex as string) * pageSize || 0;
+        const books = await this.bookService.getBooks(pageSize, pageIndex);
+        console.log(`Fetched ${books.length} books`);
         res.json(books);
       } catch (error) {
         res.status(500).json({ message: 'Error fetching books', error });
@@ -31,10 +34,16 @@ export class BookController {
       }
     });
 
-    this.router.post('/bulk', AuthMiddleware, async (req: Request, res: Response) => {
+    this.router.post('/bulk', AuthMiddleware, async (req: Request, res: Response): Promise<any> => {
+      const payloadSizeBytes = JSON.stringify(req.body).length;
+      const payloadSizeMB = (payloadSizeBytes / (1024 * 1024)).toFixed(2);
+      console.log(`Bulk create payload size: ${payloadSizeMB} MB`);
+      if (!req.body.length) {
+        return res.status(400).json({ message: 'No book data provided' });
+      }
       try {
-        const csvData: string = req.body;
-        const createdBooks = await this.bookService.bulkCreateBooks(csvData);
+        const jsonData: any = req.body;
+        const createdBooks = await this.bookService.bulkCreateBooks(jsonData);
         console.log(`${createdBooks.length} books created successfully`);
         res.status(201).json({ booksCreated: createdBooks.length });
       } catch (error) {
@@ -42,5 +51,14 @@ export class BookController {
       }
     });
 
+    this.router.post('/deduplicate', AuthMiddleware, async (req: Request, res: Response) => {
+      console.log('Deduplicating books...');
+      try {
+        const booksData = await this.bookService.deduplicateBooks();
+        res.status(200).json(booksData);
+      } catch (error) {
+        res.status(500).json({ message: 'Error deduplicating books', error });
+      }
+    });
   }
 }

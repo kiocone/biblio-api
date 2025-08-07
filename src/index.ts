@@ -22,9 +22,8 @@ export class App {
   }
 
   private config(): void {
+    this.app.use(express.json({ limit: '1mb' }));
     this.app.use(cors());
-    this.app.use(express.json());
-    this.app.use(express.text({ type: 'text/plain' }));
   }
 
   private async connectDatabase(): Promise<void> {
