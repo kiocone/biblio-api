@@ -1,16 +1,13 @@
 import { Request, Response, Router } from 'express';
-import { UserDto } from '../dtos/user.dto';
 import { IUserLogin } from '../types/user-login.interface';
 import { UserService } from '../services/user.service';
 
 export class UserController {
-  private userDTO: UserDto;
   public router: Router;
 
   constructor( 
     private userService: UserService = new UserService()
   ) {
-    this.userDTO = new UserDto();
     this.router = Router();
 
     this.router.post('/login', async (req: Request, res: Response): Promise<any> => {

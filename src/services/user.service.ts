@@ -13,8 +13,13 @@ export class UserService {
   }
 
   async loginUser(userCredentials: IUserLogin): Promise<any> {
-    const user = await User.findOne({ userName: userCredentials.userName, flatPassword: userCredentials.password });
-
+    const user = await User.findOne(
+      { 
+        userName: userCredentials.userName,
+        flatPassword: userCredentials.password
+      }
+      );
+    
     if (!user) {
       return null;
     }
