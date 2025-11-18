@@ -9,8 +9,20 @@ export class BookService {
     this.bookDto = new BookDto();
   }
 
-  async getBooks(pageSize: number, pageIndex: number): Promise<any> {
-    const books = await Book.find().skip(pageIndex).limit(pageSize);
+  async getBooks(pageSize: number, pageIndex: number, search?: string | null): Promise<any> {
+    let books = [];
+    if (search) {
+      books = await Book.find({
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { author: { $regex: search, $options: 'i' } },
+          { genre: { $regex: search, $options: 'i' } },
+          { publishedYear: { $regex: search, $options: 'i' } }
+        ]
+      }).skip(pageIndex).limit(pageSize);
+      return this.bookDto.fromDocument(books);
+    }
+    books = await Book.find().skip(pageIndex).limit(pageSize);
     return this.bookDto.fromDocument(books);
   }
 

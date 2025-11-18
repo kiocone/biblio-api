@@ -15,9 +15,10 @@ export class BookController {
       try {
         const pageSize = parseInt(req.query.pageSize as string) || 10;
         const pageIndex = parseInt(req.query.pageIndex as string) * pageSize || 0;
-        const books = await this.bookService.getBooks(pageSize, pageIndex);
+        const search = req.query.search as string || null;
+        const books = await this.bookService.getBooks(pageSize, pageIndex, search);
         console.log(`Fetched ${books.length} books`);
-        res.json(books);
+        res.status(200).json(books);
       } catch (error) {
         res.status(500).json({ message: 'Error fetching books', error });
       }
