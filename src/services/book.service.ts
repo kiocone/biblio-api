@@ -26,6 +26,15 @@ export class BookService {
     return this.bookDto.fromDocument(books);
   }
 
+  async getBookById(id: string): Promise<any> {
+    const book = await Book.findById(id);
+    console.log('Book found - Service:', book);
+    if (!book) {
+      return null;
+    }
+    return this.bookDto.fromDocument([book]);
+  }
+
   async addBook(bookData: IBook): Promise<any> {
     if (!bookData.title || !bookData.author) {
       throw new Error('Title and author are required');

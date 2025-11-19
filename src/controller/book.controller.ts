@@ -10,6 +10,21 @@ export class BookController {
     this.bookService = new BookService();
     this.router = Router();
 
+    this.router.get('/:id', async (req: Request, res: Response) => {
+      console.log(`Fetching book with ID: ${req.params.id}`);
+      try {
+        const book = await this.bookService.getBookById(req.params.id);
+        console.log('Book fetched - controller:', book);
+        if (book) {
+          res.status(200).json(book[0]);
+        } else {
+          res.status(404).json({ message: 'Book not found' });
+        }
+      } catch (error) {
+        res.status(500).json({ message: 'Error fetching book', error });
+      }
+    });
+
     this.router.get('/', async (req: Request, res: Response) => {
       console.log('Fetching books...');
       try {
