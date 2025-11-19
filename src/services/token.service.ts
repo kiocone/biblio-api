@@ -11,7 +11,7 @@ export class TokenService {
 
   async createToken(user: IUserLoggedIn): Promise<string> {
     const existingToken = await this.tokenModel.findOne({ userId: user.id });
-    if (existingToken) {
+    if (existingToken !== null) {
       await existingToken.deleteOne();
     }
 

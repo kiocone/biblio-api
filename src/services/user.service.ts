@@ -18,8 +18,7 @@ export class UserService {
         userName: userCredentials.userName,
         flatPassword: userCredentials.password
       }
-      );
-    
+    );
     if (!user) {
       return null;
     }
